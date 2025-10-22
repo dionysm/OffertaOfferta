@@ -4,18 +4,18 @@ namespace Dio\OffertaOfferta\EventSubscriber;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Content\Product\Event\ProductWrittenEvent;
-use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenContainerEvent;
-use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ProductPriceChangeSubscriber implements EventSubscriberInterface
 {
+    private EntityRepository $productRepository;
     private Connection $connection;
 
-    public function __construct(Connection $connection)
+    public function __construct(EntityRepository $productRepository, Connection $connection)
     {
+        $this->productRepository = $productRepository;
         $this->connection = $connection;
     }
 
