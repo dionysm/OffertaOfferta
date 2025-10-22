@@ -1,0 +1,27 @@
+{
+  "name": "dio/offerta-offerta",
+  "type": "shopware-platform-plugin",
+  "description": "Plugin zur Anzeige des niedrigsten Preises der letzten 30 Tage",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Dio",
+      "email": "dionysm@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Dio\\OffertaOfferta\\": "src/"
+    }
+  },
+  "extra": {
+    "shopware-plugin-class": "Dio\\OffertaOfferta\\OffertaOfferta",
+    "label": {
+      "de-DE": "OffertaOfferta",
+      "en-GB": "OffertaOfferta"
+    }
+  },
+  "require": {
+    "shopware/core": "*"
+  }
+}
