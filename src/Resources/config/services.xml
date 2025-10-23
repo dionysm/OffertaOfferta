@@ -11,8 +11,8 @@
 
         <!-- Subscriber für Preisänderungen -->
         <service id="Dio\OffertaOfferta\EventSubscriber\ProductPriceChangeSubscriber">
-            <argument type="service" id="product.repository"/>
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <!-- ZEILE MIT product.repository GELÖSCHT! -->
             <tag name="kernel.event_subscriber"/>
         </service>
 
