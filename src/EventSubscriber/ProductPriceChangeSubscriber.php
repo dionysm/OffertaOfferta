@@ -5,6 +5,8 @@ namespace Dio\OffertaOfferta\EventSubscriber;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Content\Product\ProductEvents;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
+use Shopware\Core\Framework\DataAbstractionLayer\Pricing\PriceCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\Pricing\Price;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -17,7 +19,7 @@ class ProductPriceChangeSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'product.written' => 'onProductWritten'
+            ProductEvents::PRODUCT_WRITTEN_EVENT => 'onProductWritten'
         ];
     }
 
@@ -36,8 +38,7 @@ class ProductPriceChangeSubscriber implements EventSubscriberInterface
                 FILE_APPEND
             );
 
-            // Prüfe ob Preis gesetzt wurde
-
+            // Prüfe ob Preis & ID gesetzt wurden
             if (!isset($payload['price']) || !isset($payload['id'])) {
                 file_put_contents(__DIR__ . '/../../offerta_debug.log',
                     "❌ Übersprungen - kein price oder id im Payload\n\n",
@@ -56,26 +57,49 @@ class ProductPriceChangeSubscriber implements EventSubscriberInterface
                 FILE_APPEND
             );
 
-            $productId = $payload['id'];
-            $priceData = $payload['price'];
+            $grossPrice = null;
 
-            // Hole den Bruttopreis der ersten Currency (Standard)
-            if (!is_array($priceData) || !isset($priceData[0]['gross'])) {
+            // --- Preis ermitteln, je nach Struktur ---
+            if ($priceData instanceof PriceCollection) {
+                /** @var Price|null $firstPrice */
+                $firstPrice = $priceData->first();
+                if ($firstPrice !== null) {
+                    $grossPrice = $firstPrice->getGross();
+                }
+            } elseif (is_string($priceData)) {
+                $decoded = json_decode($priceData, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    // Währungs-ID kann variieren, daher ersten Eintrag nehmen
+                    $first = reset($decoded);
+                    $grossPrice = $first['gross'] ?? null;
+                }
+            } elseif (is_array($priceData)) {
+                // Entweder Liste oder assoziatives Array mit currencyId-Keys
+                if (isset($priceData[0]['gross'])) {
+                    $grossPrice = $priceData[0]['gross'];
+                } else {
+                    $first = reset($priceData);
+                    $grossPrice = $first['gross'] ?? null;
+                }
+            }
+
+            // --- Wenn kein Preis ermittelt werden konnte ---
+            if ($grossPrice === null) {
                 file_put_contents(__DIR__ . '/../../offerta_debug.log',
-                    "❌ Übersprungen - Preis-Struktur falsch\n\n",
+                    "❌ Konnte keinen gross-Preis ermitteln\n\n",
                     FILE_APPEND
                 );
                 continue;
             }
 
-            $grossPrice = (float) $priceData[0]['gross'];
+            $grossPrice = (float) $grossPrice;
 
             file_put_contents(__DIR__ . '/../../offerta_debug.log',
                 "✅ Speichere Preis: {$grossPrice} für Produkt: {$productId}\n\n",
                 FILE_APPEND
             );
 
-            // Speichere Preisänderung
+            // --- Preisänderung in DB speichern ---
             try {
                 $this->connection->insert('dio_offerta_price_history', [
                     'id' => Uuid::randomBytes(),
