@@ -37,6 +37,7 @@ class ProductPriceChangeSubscriber implements EventSubscriberInterface
             );
 
             // Prüfe ob Preis gesetzt wurde
+
             if (!isset($payload['price']) || !isset($payload['id'])) {
                 file_put_contents(__DIR__ . '/../../offerta_debug.log',
                     "❌ Übersprungen - kein price oder id im Payload\n\n",
@@ -44,6 +45,16 @@ class ProductPriceChangeSubscriber implements EventSubscriberInterface
                 );
                 continue;
             }
+
+            $productId = $payload['id'];
+            $priceData = $payload['price'];
+
+            // 👉 Debuggen, was wirklich im price-Feld steht:
+            file_put_contents(__DIR__ . '/../../offerta_debug.log',
+                '👉 Typ von price: ' . gettype($priceData) . "\n" .
+                '👉 Inhalt von price: ' . print_r($priceData, true) . "\n\n",
+                FILE_APPEND
+            );
 
             $productId = $payload['id'];
             $priceData = $payload['price'];
