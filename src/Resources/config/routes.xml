@@ -5,10 +5,20 @@
         https://symfony.com/schema/routing/routing-1.0.xsd">
 
     <route id="api.offerta.test" path="/api/offerta/test" methods="GET">
-        <default key="_controller">Dio\OffertaOfferta\Controller\TestController::test</default>
+        <default key="_controller">Dio\OffertaOfferta\Controller\TestController::apiTest</default>
+        <default key="_routeScope">
+            <list>
+                <string>api</string>
+            </list>
+        </default>
     </route>
 
     <route id="offerta.test" path="/offerta/test" methods="GET">
         <default key="_controller">Dio\OffertaOfferta\Controller\TestController::storefrontTest</default>
+        <default key="_routeScope">
+            <list>
+                <string>storefront</string>
+            </list>
+        </default>
     </route>
 </routes>
