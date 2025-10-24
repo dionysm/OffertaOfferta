@@ -2,6 +2,7 @@
 
 namespace Dio\OffertaOfferta;
 
+use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
@@ -21,7 +22,10 @@ class OffertaOfferta extends Plugin
             return;
         }
 
+        // Hole Connection aus dem Container
+        $connection = $this->container->get(Connection::class);
+
         // Tabelle beim Deinstallieren löschen
-        $this->connection->executeStatement('DROP TABLE IF EXISTS `dio_offerta_price_history`');
+        $connection->executeStatement('DROP TABLE IF EXISTS `dio_offerta_price_history`');
     }
 }

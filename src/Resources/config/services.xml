@@ -1,10 +1,16 @@
 <?xml version="1.0" ?>
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <!-- Service -->
+        <!-- Standard: automatisch alle Services und Controller registrieren -->
+        <defaults autowire="true" autoconfigure="true" public="false"/>
+
+        <!-- Alle Klassen aus deinem Plugin-Namespace automatisch einbinden -->
+        <prototype namespace="Dio\OffertaOfferta\" resource="../../*" />
+
+        <!-- Dein LowestPriceService -->
         <service id="Dio\OffertaOfferta\Service\LowestPriceService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
@@ -12,7 +18,6 @@
         <!-- Subscriber für Preisänderungen -->
         <service id="Dio\OffertaOfferta\EventSubscriber\ProductPriceChangeSubscriber">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <!-- ZEILE MIT product.repository GELÖSCHT! -->
             <tag name="kernel.event_subscriber"/>
         </service>
 
@@ -20,6 +25,14 @@
         <service id="Dio\OffertaOfferta\Subscriber\ProductPageLoadedSubscriber">
             <argument type="service" id="Dio\OffertaOfferta\Service\LowestPriceService"/>
             <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- 👇 HIER neu: dein Storefront-Controller -->
+        <service id="Dio\OffertaOfferta\Storefront\Controller\TestController"
+                 public="true"
+                 autowire="true"
+                 autoconfigure="true">
+            <argument type="service" id="Dio\OffertaOfferta\Service\LowestPriceService"/>
         </service>
     </services>
 </container>

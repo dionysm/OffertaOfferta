@@ -3,11 +3,30 @@
 {% block page_product_detail_buy_product_price %}
     {{ parent() }}
 
+    {# DEBUG: Zeige alle Extensions #}
+    {% if app.environment == 'dev' %}
+        <div style="background: yellow; padding: 10px; margin: 10px 0;">
+            <strong>DEBUG:</strong><br>
+            Extensions vorhanden: {{ page.product.extensions|length }}<br>
+            {% for key, value in page.product.extensions %}
+                - {{ key }}<br>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {% set lowestPrice = page.product.extensions.offerta_lowest_price.value ?? null %}
 
+    {# DEBUG #}
+    {% if app.environment == 'dev' %}
+        <div style="background: yellow; padding: 10px; margin: 10px 0;">
+            <strong>DEBUG lowestPrice:</strong> {{ lowestPrice ?? 'NULL' }}
+        </div>
+    {% endif %}
+
     {% if lowestPrice is not null %}
-        <div class="product-offerta-lowest-price mt-2 text-muted" style="font-size: 0.9rem;">
-            <strong>Niedrigster Preis der letzten 30 Tage:</strong> {{ lowestPrice|currency }}
+        <div class="product-detail-price-container">
+            <p class="product-cheapest-price-headline">Cheapest Price last 30 days</p>
+            <p class="product-cheapest-price">{{ lowestPrice|currency }}</p>
         </div>
     {% endif %}
 {% endblock %}

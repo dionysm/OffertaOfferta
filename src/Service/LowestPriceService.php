@@ -11,10 +11,14 @@ class LowestPriceService
 
     public function __construct(
         private readonly Connection $connection
-    ) {}
+    ) {
+        error_log('OffertaOfferta: LowestPriceService Constructor wurde aufgerufen!');
+    }
 
     public function getLowestPriceLast30Days(string $productId): ?float
     {
+        error_log('OffertaOfferta: getLowestPriceLast30Days wurde aufgerufen für: ' . $productId);
+
         $sql = '
             SELECT MIN(price) as lowest_price
             FROM ' . self::TABLE . '
@@ -25,6 +29,8 @@ class LowestPriceService
         $result = $this->connection->fetchOne($sql, [
             'productId' => Uuid::fromHexToBytes($productId),
         ]);
+
+        error_log('OffertaOfferta: SQL Result: ' . var_export($result, true));
 
         return $result !== false ? (float) $result : null;
     }
